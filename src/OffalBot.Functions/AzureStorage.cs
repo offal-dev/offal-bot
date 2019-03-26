@@ -19,7 +19,7 @@ namespace OffalBot.Functions
                 .AddEnvironmentVariables()
                 .Build();
 
-            _storageConnectionString = config["Values:AzureWebJobsStorage"];
+            _storageConnectionString = config["AzureWebJobsStorage"];
         }
 
         public async Task<CloudQueue> GetQueue(string queueName)
