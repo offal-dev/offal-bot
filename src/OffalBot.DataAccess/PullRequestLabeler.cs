@@ -7,12 +7,12 @@ namespace OffalBot.DataAccess
 {
     public class PullRequestLabeler
     {
-        private readonly GitHubClient _githubClient;
+        private readonly IGitHubClient _githubClient;
         private readonly ILabelMaker _labelMaker;
         private readonly ILogger _log;
 
         public PullRequestLabeler(
-            GitHubClient githubClient,
+            IGitHubClient githubClient,
             ILabelMaker labelMaker,
             ILogger log)
         {
@@ -21,9 +21,9 @@ namespace OffalBot.DataAccess
             _log = log;
         }
 
-        public Task Process(ReviewRequest dao)
+        public async Task Process(ReviewRequest reviewRequest)
         {
-            throw new System.NotImplementedException();
+            var contributors = await _githubClient.Repository.GetAllContributors(reviewRequest.RepositoryId);
         }
     }
 }

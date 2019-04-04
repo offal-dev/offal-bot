@@ -21,7 +21,7 @@ namespace OffalBot.Functions
         {
             var reviewRequest = new ReviewRequest
             {
-                Repo = review["repository"]["full_name"].Value<string>(),
+                RepositoryId = review["repository"]["id"].Value<int>(),
                 PullRequestComment = review["pull_request"]["body"].Value<string>(),
                 ReviewState = review["review"]["state"].Value<string>(),
                 PullRequestNumber = review["pull_request"]["number"].Value<int>()
@@ -34,6 +34,7 @@ namespace OffalBot.Functions
                 githubClient,
                 new LabelMaker(githubClient),
                 log);
+
             await pullRequestLabeler.Process(reviewRequest);
         }
     }
