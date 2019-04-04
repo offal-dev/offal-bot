@@ -8,7 +8,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 
-namespace OffalBot.Functions.GithubAuth
+namespace OffalBot.Functions.Github
 {
     public class GitHubClientProvider
     {

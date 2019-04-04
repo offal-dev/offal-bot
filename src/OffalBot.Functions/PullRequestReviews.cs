@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OffalBot.DataAccess;
 using OffalBot.Domain;
-using OffalBot.Functions.GithubAuth;
+using OffalBot.Functions.Github;
 
 namespace OffalBot.Functions
 {
@@ -23,7 +23,7 @@ namespace OffalBot.Functions
             {
                 RepositoryId = review["repository"]["id"].Value<int>(),
                 PullRequestComment = review["pull_request"]["body"].Value<string>(),
-                ReviewState = review["review"]["state"].Value<string>(),
+                ReviewState = review["review"]["state"].Value<string>().ToLowerInvariant(),
                 PullRequestNumber = review["pull_request"]["number"].Value<int>(),
                 InstallationId = review["installation"]["id"].Value<int>()
             };
@@ -37,7 +37,7 @@ namespace OffalBot.Functions
 
             var pullRequestLabeler = new PullRequestLabeler(
                 githubClient,
-                new LabelMaker(githubClient),
+                new LabelMaker(githubClient, log),
                 log);
 
             await pullRequestLabeler.Process(reviewRequest);
