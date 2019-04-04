@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ namespace OffalBot.DataAccess
             string labelColour)
         {
             var existingLabel = await _githubClient.Issue.Labels.GetAllForRepository(repositoryId);
-            if (existingLabel.Any(x => x.Name.Equals(labelName)))
+            if (existingLabel.Any(x => x.Name.Equals(labelName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 return;
             }

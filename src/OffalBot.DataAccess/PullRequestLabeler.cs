@@ -37,22 +37,60 @@ namespace OffalBot.DataAccess
                 return;
             }
 
-            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.Approved.Name, Labels.Approved.Colour);
-            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.RequestedChanges.Name, Labels.RequestedChanges.Colour);
+            await EnsureLabelExistInRepository(reviewRequest);
 
             var expectedLabel = StateLabelMapping[reviewRequest.ReviewState];
             var issue = await _githubClient.Issue.Get(reviewRequest.RepositoryId, reviewRequest.PullRequestNumber);
-            if (issue.Labels.Any(x => x.Name.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase)))
+            if (LabelIsAlreadySet(issue, expectedLabel))
             {
                 _log.LogInformation("Nothing to do.");
                 return;
             }
 
-            _log.LogInformation("Setting label on PR...");
+            await SetLabelOnPullRequest(reviewRequest, issue, expectedLabel);
+            //await SetLabelOnConnectedIssue(reviewRequest, expectedLabel);
+        }
+
+        private async Task EnsureLabelExistInRepository(ReviewRequest reviewRequest)
+        {
+            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.Approved.Name, Labels.Approved.Colour);
+            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.RequestedChanges.Name,
+                Labels.RequestedChanges.Colour);
+        }
+
+        private static bool LabelIsAlreadySet(Issue issue, string expectedLabel)
+        {
+            return issue.Labels.Any(x => x.Name.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private async Task SetLabelOnPullRequest(
+            ReviewRequest reviewRequest,
+            Issue issue,
+            string expectedLabel)
+        {
+            var actualLabel = await FindActualLabelForRepository(reviewRequest, expectedLabel);
+
+            _log.LogInformation($"Setting label {actualLabel.Name} on PR...");
             await _githubClient.Issue.Labels.AddToIssue(
                 reviewRequest.RepositoryId,
                 reviewRequest.PullRequestNumber,
-                new[] { expectedLabel });
+                new[] { actualLabel.Name });
+        }
+
+        private async Task<Label> FindActualLabelForRepository(ReviewRequest reviewRequest, string expectedLabel)
+        {
+            var existingLabels =
+                await _githubClient.Issue.Labels.GetAllForRepository(reviewRequest.RepositoryId);
+
+            return existingLabels.First(x =>
+                x.Name.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private async Task SetLabelOnConnectedIssue(
+            ReviewRequest reviewRequest,
+            string expectedLabel)
+        {
+            throw new NotImplementedException();
         }
     }
 }
