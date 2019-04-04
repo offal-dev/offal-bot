@@ -24,12 +24,17 @@ namespace OffalBot.Functions
                 RepositoryId = review["repository"]["id"].Value<int>(),
                 PullRequestComment = review["pull_request"]["body"].Value<string>(),
                 ReviewState = review["review"]["state"].Value<string>(),
-                PullRequestNumber = review["pull_request"]["number"].Value<int>()
+                PullRequestNumber = review["pull_request"]["number"].Value<int>(),
+                InstallationId = review["installation"]["id"].Value<int>()
             };
 
             log.LogInformation($"Processing: {JsonConvert.SerializeObject(reviewRequest, Formatting.Indented)}");
 
-            var githubClient = new GitHubClientProvider().Create(githubAppId, githubAppKey);
+            var githubClient = await new GitHubClientProvider().CreateForInstallation(
+                githubAppId,
+                githubAppKey,
+                reviewRequest.InstallationId);
+
             var pullRequestLabeler = new PullRequestLabeler(
                 githubClient,
                 new LabelMaker(githubClient),

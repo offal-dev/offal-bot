@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Octokit;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -35,6 +34,25 @@ namespace OffalBot.Functions.GithubAuth
             };
         }
 
+        public async Task<IGitHubClient> CreateForInstallation(
+            string githubAppId,
+            string githubAppKey,
+            int installationId)
+        {
+            if (installationId < 1)
+            {
+                throw new ArgumentNullException(nameof(installationId));
+            }
+
+            var githubAppClient = Create(githubAppId, githubAppKey);
+            var response = await githubAppClient.GitHubApps.CreateInstallationToken(installationId);
+
+            return new GitHubClient(new ProductHeaderValue("Offalbot"))
+            {
+                Credentials = new Credentials(response.Token)
+            };
+        }
+
         private static string CreateJwtToken(
             string githubAppId,
             string githubAppKey)
@@ -48,11 +66,12 @@ namespace OffalBot.Functions.GithubAuth
                 keyPair = (AsymmetricCipherKeyPair)new PemReader(streamReader).ReadObject();
             }
 
-            var claims = new List<Claim>
+            var now = DateTimeOffset.UtcNow;
+            var claims = new Dictionary<string, object>
             {
-                new Claim("iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
-                new Claim("exp", DateTimeOffset.UtcNow.AddMinutes(10).ToUnixTimeSeconds().ToString()),
-                new Claim("iss", githubAppId)
+                { "iat", now.ToUnixTimeSeconds() },
+                { "exp", now.AddMinutes(10).ToUnixTimeSeconds() },
+                {"iss", githubAppId }
             };
 
             using (var rsa = new RSACryptoServiceProvider())
@@ -60,8 +79,7 @@ namespace OffalBot.Functions.GithubAuth
                 var rsaParams = ToRsaParameters((RsaPrivateCrtKeyParameters)keyPair.Private);
                 rsa.ImportParameters(rsaParams);
 
-                var payload = claims.ToDictionary(k => k.Type, v => (object)v.Value);
-                return Jose.JWT.Encode(payload, rsa, Jose.JwsAlgorithm.RS256);
+                return Jose.JWT.Encode(claims, rsa, Jose.JwsAlgorithm.RS256);
             }
         }
 

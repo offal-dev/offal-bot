@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Octokit;
@@ -23,7 +24,7 @@ namespace OffalBot.DataAccess
 
         public async Task Process(ReviewRequest reviewRequest)
         {
-            var contributors = await _githubClient.Repository.GetAllContributors(reviewRequest.RepositoryId);
+            var repo = await _githubClient.Repository.Get(reviewRequest.RepositoryId);
         }
     }
 }
