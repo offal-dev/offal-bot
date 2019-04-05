@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OffalBot.Functions", "src\OffalBot.Functions\OffalBot.Functions.csproj", "{D8C44714-F1E6-4075-BACA-08700F528648}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OffalBot.Domain", "src\OffalBot.Domain\OffalBot.Domain.csproj", "{EAB6A4FC-0C0D-4FD4-8946-B948B0F1C814}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OffalBot.Domain", "src\OffalBot.Domain\OffalBot.Domain.csproj", "{EAB6A4FC-0C0D-4FD4-8946-B948B0F1C814}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OffalBot.DataAccess", "src\OffalBot.DataAccess\OffalBot.DataAccess.csproj", "{9D659D89-7CCD-46F8-827C-203997BA732A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OffalBot.DataAccess", "src\OffalBot.DataAccess\OffalBot.DataAccess.csproj", "{9D659D89-7CCD-46F8-827C-203997BA732A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
