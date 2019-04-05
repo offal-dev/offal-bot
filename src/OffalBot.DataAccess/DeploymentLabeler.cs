@@ -32,7 +32,7 @@ namespace OffalBot.DataAccess
             await _labelMaker.CreateIfMissing(
                 reviewRequest.RepositoryId,
                 reviewRequest.LabelFriendlyEnvironment(),
-                "6699FF");
+                "EDEDED");
 
             var pullRequest = await FindPullRequestForCommit(
                 reviewRequest.CommitSha,
