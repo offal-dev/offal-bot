@@ -14,7 +14,7 @@ namespace OffalBot.Functions
     {
         [FunctionName("deployments")]
         public static async Task Run(
-            [QueueTrigger("github-deployments")]JObject review,
+            [QueueTrigger("github-deployment")]JObject review,
             [FromConfig(Name = "github-app-id")]string githubAppId,
             [FromConfig(Name = "github-app-key")]string githubAppKey,
             ILogger log)
