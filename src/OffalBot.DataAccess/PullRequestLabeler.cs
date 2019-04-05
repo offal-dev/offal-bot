@@ -17,7 +17,7 @@ namespace OffalBot.DataAccess
         private static readonly Dictionary<string, string> StateLabelMapping = new Dictionary<string, string>
         {
             {"approved", Labels.Approved.Name },
-            {"rejected", Labels.RequestedChanges.Name }
+            {"changes_requested", Labels.RequestedChanges.Name }
         };
 
         public PullRequestLabeler(
