@@ -19,7 +19,7 @@ namespace OffalBot.DataAccess
         }
 
         public async Task CreateIfMissing(
-            int repositoryId,
+            long repositoryId,
             string labelName,
             string labelColour)
         {
