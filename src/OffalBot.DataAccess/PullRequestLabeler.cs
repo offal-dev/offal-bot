@@ -17,7 +17,7 @@ namespace OffalBot.DataAccess
         private static readonly Dictionary<string, string> StateLabelMapping = new Dictionary<string, string>
         {
             {"approved", Labels.Approved.Name },
-            {"changes_requested", Labels.RequestedChanges.Name }
+            {"changes_requested", Labels.ChangesRequested.Name }
         };
 
         public PullRequestLabeler(
@@ -49,8 +49,8 @@ namespace OffalBot.DataAccess
         private async Task EnsureLabelExistInRepository(ReviewRequest reviewRequest)
         {
             await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.Approved.Name, Labels.Approved.Colour);
-            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.RequestedChanges.Name,
-                Labels.RequestedChanges.Colour);
+            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.ChangesRequested.Name,
+                Labels.ChangesRequested.Colour);
         }
 
         private static bool LabelIsAlreadySet(Issue issue, string expectedLabel)

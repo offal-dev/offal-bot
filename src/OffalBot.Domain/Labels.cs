@@ -8,10 +8,10 @@
             public static string Colour = "00FF00";
         }
 
-        public static class RequestedChanges
+        public static class ChangesRequested
         {
-            public static string Name = "requested-changes";
-            public static string Colour = "E83C44";
+            public static string Name = "changes-requested";
+            public static string Colour = "FFEE66";
         }
     }
 }
