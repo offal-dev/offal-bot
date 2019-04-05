@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Octokit;
@@ -40,15 +41,9 @@ namespace OffalBot.DataAccess
             await EnsureLabelExistInRepository(reviewRequest);
 
             var expectedLabel = StateLabelMapping[reviewRequest.ReviewState];
-            var issue = await _githubClient.Issue.Get(reviewRequest.RepositoryId, reviewRequest.PullRequestNumber);
-            if (LabelIsAlreadySet(issue, expectedLabel))
-            {
-                _log.LogInformation("Nothing to do.");
-                return;
-            }
 
-            await SetLabelOnPullRequest(reviewRequest, issue, expectedLabel);
-            //await SetLabelOnConnectedIssue(reviewRequest, expectedLabel);
+            await SetLabelOnIssue(reviewRequest.RepositoryId, reviewRequest.PullRequestNumber, expectedLabel);
+            await SetLabelOnConnectedIssue(reviewRequest, expectedLabel);
         }
 
         private async Task EnsureLabelExistInRepository(ReviewRequest reviewRequest)
@@ -63,24 +58,31 @@ namespace OffalBot.DataAccess
             return issue.Labels.Any(x => x.Name.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        private async Task SetLabelOnPullRequest(
-            ReviewRequest reviewRequest,
-            Issue issue,
+        private async Task SetLabelOnIssue(
+            int repositoryId,
+            int issueNumber,
             string expectedLabel)
         {
-            var actualLabel = await FindActualLabelForRepository(reviewRequest, expectedLabel);
+            var issue = await _githubClient.Issue.Get(repositoryId, issueNumber);
+            if (LabelIsAlreadySet(issue, expectedLabel))
+            {
+                _log.LogInformation("Nothing to do.");
+                return;
+            }
 
-            _log.LogInformation($"Setting label {actualLabel.Name} on PR...");
+            var actualLabel = await FindActualLabelForRepository(repositoryId, expectedLabel);
+
+            _log.LogInformation($"Setting label {actualLabel.Name} on issue...");
             await _githubClient.Issue.Labels.AddToIssue(
-                reviewRequest.RepositoryId,
-                reviewRequest.PullRequestNumber,
+                repositoryId,
+                issueNumber,
                 new[] { actualLabel.Name });
         }
 
-        private async Task<Label> FindActualLabelForRepository(ReviewRequest reviewRequest, string expectedLabel)
+        private async Task<Label> FindActualLabelForRepository(int repositoryId, string expectedLabel)
         {
             var existingLabels =
-                await _githubClient.Issue.Labels.GetAllForRepository(reviewRequest.RepositoryId);
+                await _githubClient.Issue.Labels.GetAllForRepository(repositoryId);
 
             return existingLabels.First(x =>
                 x.Name.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase));
@@ -90,7 +92,27 @@ namespace OffalBot.DataAccess
             ReviewRequest reviewRequest,
             string expectedLabel)
         {
-            throw new NotImplementedException();
+            var regex = new Regex("Connects #([0-9][0-9][0-9][0-9])");
+            var match = regex.Match(reviewRequest.PullRequestComment);
+
+            if (!match.Success)
+            {
+                return;
+            }
+
+            var issueNumber = Convert.ToInt32(match.Groups[1].Value);
+
+            try
+            {
+                await _githubClient.Issue.Get(reviewRequest.RepositoryId, issueNumber);
+            }
+            catch
+            {
+                _log.LogWarning($"Unable to find issue for number {issueNumber}");
+                return;
+            }
+
+            await SetLabelOnIssue(reviewRequest.RepositoryId, issueNumber, expectedLabel);
         }
     }
 }
