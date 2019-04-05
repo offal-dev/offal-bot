@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -13,6 +12,7 @@ namespace OffalBot.DataAccess
     {
         private readonly IGitHubClient _githubClient;
         private readonly ILabelMaker _labelMaker;
+        private readonly IIssueLabelManager _issueLabelManager;
         private readonly ILogger _log;
         private static readonly Dictionary<string, string> StateLabelMapping = new Dictionary<string, string>
         {
@@ -23,10 +23,12 @@ namespace OffalBot.DataAccess
         public PullRequestLabeler(
             IGitHubClient githubClient,
             ILabelMaker labelMaker,
+            IIssueLabelManager issueLabelManager,
             ILogger log)
         {
             _githubClient = githubClient;
             _labelMaker = labelMaker;
+            _issueLabelManager = issueLabelManager;
             _log = log;
         }
 
@@ -42,7 +44,11 @@ namespace OffalBot.DataAccess
 
             var expectedLabel = StateLabelMapping[reviewRequest.ReviewState];
 
-            await SetLabelOnIssue(reviewRequest.RepositoryId, reviewRequest.PullRequestNumber, expectedLabel);
+            await _issueLabelManager.SetLabelOnIssue(
+                reviewRequest.RepositoryId,
+                reviewRequest.PullRequestNumber,
+                expectedLabel);
+
             await SetLabelOnConnectedIssue(reviewRequest, expectedLabel);
         }
 
@@ -51,41 +57,6 @@ namespace OffalBot.DataAccess
             await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.Approved.Name, Labels.Approved.Colour);
             await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.ChangesRequested.Name,
                 Labels.ChangesRequested.Colour);
-        }
-
-        private static bool LabelIsAlreadySet(Issue issue, string expectedLabel)
-        {
-            return issue.Labels.Any(x => x.Name.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        private async Task SetLabelOnIssue(
-            int repositoryId,
-            int issueNumber,
-            string expectedLabel)
-        {
-            var issue = await _githubClient.Issue.Get(repositoryId, issueNumber);
-            if (LabelIsAlreadySet(issue, expectedLabel))
-            {
-                _log.LogInformation("Nothing to do.");
-                return;
-            }
-
-            var actualLabel = await FindActualLabelForRepository(repositoryId, expectedLabel);
-
-            _log.LogInformation($"Setting label {actualLabel.Name} on issue...");
-            await _githubClient.Issue.Labels.AddToIssue(
-                repositoryId,
-                issueNumber,
-                new[] { actualLabel.Name });
-        }
-
-        private async Task<Label> FindActualLabelForRepository(int repositoryId, string expectedLabel)
-        {
-            var existingLabels =
-                await _githubClient.Issue.Labels.GetAllForRepository(repositoryId);
-
-            return existingLabels.First(x =>
-                x.Name.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private async Task SetLabelOnConnectedIssue(
@@ -112,7 +83,10 @@ namespace OffalBot.DataAccess
                 return;
             }
 
-            await SetLabelOnIssue(reviewRequest.RepositoryId, issueNumber, expectedLabel);
+            await _issueLabelManager.SetLabelOnIssue(
+                reviewRequest.RepositoryId,
+                issueNumber,
+                expectedLabel);
         }
     }
 }

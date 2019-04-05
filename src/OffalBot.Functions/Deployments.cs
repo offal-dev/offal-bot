@@ -10,22 +10,21 @@ using OffalBot.Functions.Github;
 
 namespace OffalBot.Functions
 {
-    public static class PullRequestReviews
+    public static class Deployments
     {
-        [FunctionName("pull-request-reviews")]
+        [FunctionName("deployments")]
         public static async Task Run(
-            [QueueTrigger("github-pullrequestreview")]JObject review,
+            [QueueTrigger("github-deployments")]JObject review,
             [FromConfig(Name = "github-app-id")]string githubAppId,
             [FromConfig(Name = "github-app-key")]string githubAppKey,
             ILogger log)
         {
-            var reviewRequest = new ReviewRequest
+            var reviewRequest = new DeploymentRequest
             {
+                InstallationId = review["installation"]["id"].Value<int>(),
                 RepositoryId = review["repository"]["id"].Value<long>(),
-                PullRequestComment = review["pull_request"]["body"].Value<string>(),
-                ReviewState = review["review"]["state"].Value<string>().ToLowerInvariant(),
-                PullRequestNumber = review["pull_request"]["number"].Value<int>(),
-                InstallationId = review["installation"]["id"].Value<int>()
+                Environment = review["deployment"]["environment"].Value<string>(),
+                CommitSha = review["deployment"]["sha"].Value<string>()
             };
 
             log.LogInformation($"Processing: {JsonConvert.SerializeObject(reviewRequest, Formatting.Indented)}");
@@ -35,10 +34,10 @@ namespace OffalBot.Functions
                 githubAppKey,
                 reviewRequest.InstallationId);
 
-            var pullRequestLabeler = new PullRequestLabeler(
+            var pullRequestLabeler = new DeploymentLabeler(
                 githubClient,
                 new LabelMaker(githubClient, log),
-                new IssueLabelManager(githubClient, log),
+                new IssueLabelManager(githubClient, log), 
                 log);
 
             await pullRequestLabeler.Process(reviewRequest);
