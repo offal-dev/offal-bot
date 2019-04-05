@@ -6,6 +6,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 
 namespace OffalBot.Functions
@@ -19,15 +20,13 @@ namespace OffalBot.Functions
             ILogger log)
         {
             var poison = await new AzureStorage(context).GetQueue("github-deployment-poison");
-            var messages = await poison.GetMessagesAsync(10);
-
             var deployment = await new AzureStorage(context).GetQueue("github-deployment");
 
-            foreach (var message in messages)
+            foreach (var retrievedMessage in await poison.GetMessagesAsync(10))
             {
-                log.LogInformation("Migrating message...");
-                await deployment.AddMessageAsync(message);
-                await poison.DeleteMessageAsync(message);
+                var retrievedMessageAsString = retrievedMessage.AsString;
+                await deployment.AddMessageAsync(new CloudQueueMessage(retrievedMessageAsString));
+                await poison.DeleteMessageAsync(retrievedMessage);
             }
 
             return new OkResult();
