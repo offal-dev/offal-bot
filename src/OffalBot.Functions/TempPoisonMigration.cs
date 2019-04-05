@@ -27,6 +27,7 @@ namespace OffalBot.Functions
             {
                 log.LogInformation("Migrating message...");
                 await deployment.AddMessageAsync(message);
+                await poison.DeleteMessageAsync(message);
             }
 
             return new OkResult();
