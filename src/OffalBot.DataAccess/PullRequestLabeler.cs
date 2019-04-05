@@ -92,7 +92,7 @@ namespace OffalBot.DataAccess
             ReviewRequest reviewRequest,
             string expectedLabel)
         {
-            var regex = new Regex("Connects #([0-9][0-9][0-9][0-9])");
+            var regex = new Regex("Connects #([0-9]{0,8})");
             var match = regex.Match(reviewRequest.PullRequestComment);
 
             if (!match.Success)
