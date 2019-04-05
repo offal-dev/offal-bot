@@ -12,7 +12,7 @@ namespace OffalBot.Functions
 {
     public static class PullRequestReviews
     {
-        [FunctionName("PullRequestReviews")]
+        [FunctionName("pull-request-reviews")]
         public static async Task Run(
             [QueueTrigger("github-pullrequestreview")]JObject review,
             [FromConfig(Name = "github-app-id")]string githubAppId,
