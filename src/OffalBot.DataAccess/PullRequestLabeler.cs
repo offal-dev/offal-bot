@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Octokit;
@@ -49,44 +48,38 @@ namespace OffalBot.DataAccess
                 reviewRequest.PullRequestNumber,
                 expectedLabel);
 
-            await SetLabelOnConnectedIssue(reviewRequest, expectedLabel);
+            await RemoveOtherLabels(reviewRequest, expectedLabel);
         }
 
         private async Task EnsureLabelExistInRepository(ReviewRequest reviewRequest)
         {
-            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.Approved.Name, Labels.Approved.Colour);
-            await _labelMaker.CreateIfMissing(reviewRequest.RepositoryId, Labels.ChangesRequested.Name,
+            await _labelMaker.CreateIfMissing(
+                reviewRequest.RepositoryId,
+                Labels.Approved.Name,
+                Labels.Approved.Colour);
+
+            await _labelMaker.CreateIfMissing(
+                reviewRequest.RepositoryId,
+                Labels.ChangesRequested.Name,
                 Labels.ChangesRequested.Colour);
         }
 
-        private async Task SetLabelOnConnectedIssue(
+        private async Task RemoveOtherLabels(
             ReviewRequest reviewRequest,
             string expectedLabel)
         {
-            var regex = new Regex("Connects #([0-9]{0,8})");
-            var match = regex.Match(reviewRequest.PullRequestComment);
-
-            if (!match.Success)
+            foreach (var knownLabel in StateLabelMapping.Values)
             {
-                return;
-            }
+                if (knownLabel.Equals(expectedLabel, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    continue;
+                }
 
-            var issueNumber = Convert.ToInt32(match.Groups[1].Value);
-
-            try
-            {
-                await _githubClient.Issue.Get(reviewRequest.RepositoryId, issueNumber);
+                await _issueLabelManager.RemoveLabel(
+                    reviewRequest.RepositoryId,
+                    reviewRequest.PullRequestNumber,
+                    knownLabel);
             }
-            catch
-            {
-                _log.LogWarning($"Unable to find issue for number {issueNumber}");
-                return;
-            }
-
-            await _issueLabelManager.SetLabelOnIssue(
-                reviewRequest.RepositoryId,
-                issueNumber,
-                expectedLabel);
         }
     }
 }

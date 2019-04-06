@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Octokit;
@@ -38,38 +37,14 @@ namespace OffalBot.DataAccess
                 reviewRequest.CommitSha,
                 reviewRequest.RepositoryId);
 
-            var prRepository = await FindIssueRepository(pullRequest);
-            
-            _log.LogInformation($"For SHA '{reviewRequest.CommitSha}' Found Issue {pullRequest.Number} in {prRepository.Name}");
+            _log.LogInformation($"For SHA '{reviewRequest.CommitSha}' Found Issue {pullRequest.Number}");
 
             await _issueLabelManager.SetLabelOnIssue(
-                prRepository.Id,
+                reviewRequest.RepositoryId,
                 pullRequest.Number,
                 reviewRequest.LabelFriendlyEnvironment());
 
-            await _issueLabelManager.RemoveLabel(
-                prRepository.Id,
-                pullRequest.Number,
-                Labels.Approved.Name);
-
-            await _issueLabelManager.RemoveLabel(
-                prRepository.Id,
-                pullRequest.Number,
-                Labels.ChangesRequested.Name);
-        }
-
-        private async Task<Repository> FindIssueRepository(Issue pullRequest)
-        {
-            var regex = new Regex("api\\.github\\.com\\/repos\\/(.*?)\\/(.*?)\\/issues");
-            var match = regex.Match(pullRequest.Url);
-            if (!match.Success)
-            {
-                throw new Exception($"Unable to detect repo from URL {pullRequest.Url}");
-            }
-
-            return await _githubClient.Repository.Get(
-                match.Groups[1].Value,
-                match.Groups[2].Value);
+            await RemoveCodeReviewLabels(reviewRequest, pullRequest);
         }
 
         private async Task<Issue> FindPullRequestForCommit(
@@ -91,6 +66,21 @@ namespace OffalBot.DataAccess
             }
 
             return searchResult.Items.First();
+        }
+
+        private async Task RemoveCodeReviewLabels(
+            DeploymentRequest reviewRequest,
+            Issue pullRequest)
+        {
+            await _issueLabelManager.RemoveLabel(
+                reviewRequest.RepositoryId,
+                pullRequest.Number,
+                Labels.Approved.Name);
+
+            await _issueLabelManager.RemoveLabel(
+                reviewRequest.RepositoryId,
+                pullRequest.Number,
+                Labels.ChangesRequested.Name);
         }
     }
 }
