@@ -27,7 +27,7 @@ namespace OffalBot.Functions.Functions
     {
         [FunctionName("github-login")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "github/login")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "github/login")] HttpRequest req,
             [FromConfig(Name = "github-oauth-client-id")]string clientId,
             [FromConfig(Name = "github-oauth-client-secret")]string clientSecret,
             CloudStorageAccount storageAccount,
