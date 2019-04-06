@@ -70,7 +70,7 @@ namespace OffalBot.Functions.Functions
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
+                    Secure = !req.Host.Host.Equals("localhost", StringComparison.InvariantCultureIgnoreCase),
                     Expires = DateTimeOffset.Now.AddHours(8)
                 });
 
