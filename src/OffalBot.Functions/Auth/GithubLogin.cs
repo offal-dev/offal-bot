@@ -2,10 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using Bindings.Azure.WebJobs.Extensions.UsefulBindings;
 using Flurl;
 using Flurl.Http;
@@ -22,7 +19,7 @@ using Newtonsoft.Json.Linq;
 using Octokit;
 using OffalBot.Functions.Github;
 
-namespace OffalBot.Functions.Functions
+namespace OffalBot.Functions.Auth
 {
     public static class GithubLogin
     {
@@ -125,19 +122,6 @@ namespace OffalBot.Functions.Functions
                 Expiry = DateTimeOffset.Now.AddHours(8)
             };
             return session;
-        }
-    }
-
-    public class SessionDao : TableEntity
-    {
-        public string Organisations { get; set; }
-        public string Username { get; set; }
-        public DateTimeOffset Expiry { get; set; }
-
-        public class Organisation
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
         }
     }
 }
