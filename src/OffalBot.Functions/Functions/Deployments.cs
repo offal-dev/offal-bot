@@ -8,7 +8,7 @@ using OffalBot.DataAccess;
 using OffalBot.Domain;
 using OffalBot.Functions.Github;
 
-namespace OffalBot.Functions
+namespace OffalBot.Functions.Functions
 {
     public static class Deployments
     {

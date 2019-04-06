@@ -1,23 +1,24 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace OffalBot.Functions
+namespace OffalBot.Functions.Functions
 {
     public static class InboundGithubWebhook
     {
         [FunctionName("inbound-github-webhook")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "github/webhooks")]HttpRequest req,
-            ExecutionContext context,
+            CloudStorageAccount cloudStorage,
             ILogger log)
         {
             var payLoad = await new StreamReader(req.Body).ReadToEndAsync();
@@ -36,7 +37,7 @@ namespace OffalBot.Functions
                 return new BadRequestResult();
             }
 
-            var queue = await new AzureStorage(context).GetQueue($"github-{eventType}");
+            var queue = await new AzureStorage(cloudStorage).GetQueue($"github-{eventType}");
             await queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(jsonObject)));
 
             return new OkResult();
