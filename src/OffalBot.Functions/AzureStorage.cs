@@ -1,42 +1,44 @@
 ﻿using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace OffalBot.Functions
 {
     public class AzureStorage
     {
-        private readonly string _storageConnectionString;
+        private readonly CloudStorageAccount _storageAccount;
 
-        public AzureStorage(ExecutionContext context)
+        public AzureStorage(CloudStorageAccount storageAccount)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(context.FunctionAppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            _storageConnectionString = config["AzureWebJobsStorage"];
+            _storageAccount = storageAccount;
         }
 
         public async Task<CloudQueue> GetQueue(string queueName)
         {
-            var storageAccount = CloudStorageAccount.Parse(_storageConnectionString);
-            var queueClient = storageAccount.CreateCloudQueueClient();
-            var queue = queueClient.GetQueueReference(SanitiseQueueName(queueName));
+            var queueClient = _storageAccount.CreateCloudQueueClient();
+            var queue = queueClient.GetQueueReference(SanitiseName(queueName));
 
             await queue.CreateIfNotExistsAsync();
 
             return queue;
         }
 
-        private static string SanitiseQueueName(string queueName)
+        public async Task<CloudTable> GetTable(string tableName)
+        {
+            var client = _storageAccount.CreateCloudTableClient();
+
+            var table = client.GetTableReference(SanitiseName(tableName));
+            await table.CreateIfNotExistsAsync();
+
+            return table;
+        }
+
+        private static string SanitiseName(string name)
         {
             var trimmer = new Regex("([^A-Za-z0-9\\-]+)");
-            var sanitised = trimmer.Replace(queueName, string.Empty);
+            var sanitised = trimmer.Replace(name, string.Empty);
 
             return sanitised.ToLowerInvariant();
         }

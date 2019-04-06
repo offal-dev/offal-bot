@@ -12,7 +12,17 @@ namespace OffalBot.Functions.Github
 {
     public class GitHubClientProvider
     {
-        public GitHubClient Create(
+        public GitHubClient CreateForAccessToken(string accessToken)
+        {
+            return new GitHubClient(new ProductHeaderValue("OffalBot"))
+            {
+                Credentials = new Credentials(
+                    accessToken,
+                    AuthenticationType.Bearer)
+            };
+        }
+
+        public GitHubClient CreateForGithubApp(
             string githubAppId,
             string githubAppKey)
         {
@@ -44,7 +54,7 @@ namespace OffalBot.Functions.Github
                 throw new ArgumentNullException(nameof(installationId));
             }
 
-            var githubAppClient = Create(githubAppId, githubAppKey);
+            var githubAppClient = CreateForGithubApp(githubAppId, githubAppKey);
             var response = await githubAppClient.GitHubApps.CreateInstallationToken(installationId);
 
             return new GitHubClient(new ProductHeaderValue("Offalbot"))
