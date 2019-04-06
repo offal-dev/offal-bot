@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -125,29 +126,18 @@ namespace OffalBot.Functions.Functions
             };
             return session;
         }
+    }
 
-        private static string CreateCookie(
-            string name,
-            string value)
+    public class SessionDao : TableEntity
+    {
+        public string Organisations { get; set; }
+        public string Username { get; set; }
+        public DateTimeOffset Expiry { get; set; }
+
+        public class Organisation
         {
-            return new StringBuilder()
-                .Append(HttpUtility.UrlEncode(name) + "=" + HttpUtility.UrlEncode(value))
-                .Append("; HttpOnly")
-                .Append("; Secure")
-                .ToString();
-        }
-
-        public class SessionDao : TableEntity
-        {
-            public string Organisations { get; set; }
-            public string Username { get; set; }
-            public DateTimeOffset Expiry { get; set; }
-
-            public class Organisation
-            {
-                public int Id { get; set; }
-                public string Name { get; set; }
-            }
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
     }
 }
