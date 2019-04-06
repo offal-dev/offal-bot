@@ -69,7 +69,8 @@ namespace OffalBot.Functions.Auth
                 {
                     HttpOnly = true,
                     Secure = !req.Host.Host.Equals("localhost", StringComparison.InvariantCultureIgnoreCase),
-                    Expires = DateTimeOffset.Now.AddHours(8)
+                    Expires = DateTimeOffset.Now.AddHours(8),
+                    SameSite = SameSiteMode.None
                 });
 
             return new RedirectResult("https://www.offal.dev/logged-in");
