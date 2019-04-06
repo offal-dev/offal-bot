@@ -72,7 +72,7 @@ namespace OffalBot.Functions.Auth
                     Expires = DateTimeOffset.Now.AddHours(8)
                 });
 
-            return new RedirectResult("https://www.offal.dev");
+            return new RedirectResult("https://www.offal.dev/logged-in");
         }
 
         private static async Task<string> GetAccessToken(

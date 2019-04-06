@@ -7,6 +7,7 @@ namespace OffalBot.Functions.Auth
     public class Session
     {
         public string Id { get; }
+        public string Username { get; }
         public DateTimeOffset Expiry { get; }
         public IEnumerable<SessionDao.Organisation> Organisations { get; }
 
@@ -14,7 +15,9 @@ namespace OffalBot.Functions.Auth
         {
             Id = dao.PartitionKey;
             Expiry = dao.Expiry;
+            Username = dao.Username;
             Organisations = JsonConvert.DeserializeObject<List<SessionDao.Organisation>>(dao.Organisations);
         }
+
     }
 }
