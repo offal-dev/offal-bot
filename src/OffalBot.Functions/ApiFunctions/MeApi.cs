@@ -6,22 +6,22 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Newtonsoft.Json;
+using OffalBot.Functions.Auth;
 
-namespace OffalBot.Functions.Auth
+namespace OffalBot.Functions.ApiFunctions
 {
-    public static class GithubWhoAmI
+    public static class MeApi
     {
-        [FunctionName("github-who-am-i")]
+        [FunctionName("me-api")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "github/me")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "me")] HttpRequest req,
             CloudStorageAccount storageAccount,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
             var session = await req.GetAuthSession(storageAccount);
             if (session == null)
             {
+                log.LogInformation("Unable to find session");
                 return new UnauthorizedResult();
             }
 

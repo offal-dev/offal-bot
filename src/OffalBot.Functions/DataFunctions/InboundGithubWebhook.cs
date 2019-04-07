@@ -11,7 +11,7 @@ using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace OffalBot.Functions.Functions
+namespace OffalBot.Functions.DataFunctions
 {
     public static class InboundGithubWebhook
     {
