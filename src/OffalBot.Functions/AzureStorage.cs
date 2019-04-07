@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
@@ -34,6 +36,28 @@ namespace OffalBot.Functions
             await table.CreateIfNotExistsAsync();
 
             return table;
+        }
+
+        public async Task<IEnumerable<T>> QueryTable<T>(
+            CloudTable table,
+            TableQuery query,
+            EntityResolver<T> resolver)
+        {
+            TableContinuationToken token = null;
+
+            var results = new List<T>();
+            do
+            {
+                var seg = await table
+                    .ExecuteQuerySegmentedAsync(query, resolver,token)
+                    .ConfigureAwait(false);
+
+                token = seg.ContinuationToken;
+
+                results.AddRange(seg.Results);
+            } while (token != null);
+
+            return results;
         }
 
         private static string SanitiseName(string name)
