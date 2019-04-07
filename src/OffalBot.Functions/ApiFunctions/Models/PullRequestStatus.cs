@@ -4,7 +4,6 @@ namespace OffalBot.Functions.ApiFunctions.Models
     {
         Open,
         Closed,
-        ChangesRequested,
-        Approved
+        Merged
     }
 }

@@ -7,14 +7,14 @@ namespace OffalBot.Functions.ApiFunctions.Models
     {
         public string Title { get; set; }
         public int Number { get; set; }
-        public string Url { get; set; }
+        public Uri Url { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset ModifiedAt { get; set; }
         public DateTimeOffset ClosedAt { get; set; }
         public GithubUser Author { get; set; }
         public PullRequestStatus Status { get; set; }
         public string RepositoryName { get; set; }
-        public string RepositoryUrl { get; set; }
+        public Uri RepositoryUrl { get; set; }
         public IEnumerable<GithubUser> Assignees { get; set; }
         public IEnumerable<DeploymentEnvironment> DeploymentEnvironments { get; set; }
         public IEnumerable<ReviewStatus> Reviews { get; set; }
