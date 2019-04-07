@@ -6,6 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using OffalBot.Functions.Auth;
 
 namespace OffalBot.Functions.ApiFunctions
@@ -25,7 +26,11 @@ namespace OffalBot.Functions.ApiFunctions
                 return new UnauthorizedResult();
             }
 
-            return new JsonResult(session, new JsonSerializerSettings { Formatting = Formatting.Indented });
+            return new JsonResult(session, new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
         }
     }
 }
