@@ -1,5 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using OffalBot.Domain;
+using OffalBot.Domain.PullRequests;
 
 namespace OffalBot.DataAccess.PullRequests
 {
@@ -16,7 +17,8 @@ namespace OffalBot.DataAccess.PullRequests
         {
             switch ((action ?? "").ToLowerInvariant())
             {
-                case "opened": return new OpenProcessor(_cloudStorage);
+                case "opened": return new OpenProcessor(
+                    new PullRequestRepository(_cloudStorage.CreateCloudTableClient()));
             }
 
             return null;

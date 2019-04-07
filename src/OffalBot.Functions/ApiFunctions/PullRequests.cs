@@ -17,7 +17,7 @@ namespace OffalBot.Functions.ApiFunctions
     {
         [FunctionName("pull-requests-api")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "me")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pull-requests")] HttpRequest req,
             CloudStorageAccount storageAccount,
             ILogger log)
         {

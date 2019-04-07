@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Bindings.Azure.WebJobs.Extensions.UsefulBindings;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
@@ -12,7 +11,7 @@ namespace OffalBot.Functions.DataFunctions
     {
         [FunctionName("pull-requests")]
         public static async Task Run(
-            [QueueTrigger("github-pullrequest-ignore")]
+            [QueueTrigger("github-pullrequest")]
             JObject payload,
             CloudStorageAccount cloudStorage,
             ILogger log)
