@@ -12,7 +12,7 @@ namespace OffalBot.Functions.DataFunctions
     {
         [FunctionName("pull-requests")]
         public static async Task Run(
-            [QueueTrigger("github-pullrequest")]
+            [QueueTrigger("github-pullrequest-ignore")]
             JObject payload,
             CloudStorageAccount cloudStorage,
             ILogger log)
