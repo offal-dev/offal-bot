@@ -9,12 +9,9 @@ namespace OffalBot.DataAccess.Extensions
             this IDictionary<string, EntityProperty> properties,
             string key)
         {
-            if (!properties.ContainsKey(key))
-            {
-                return null;
-            }
-
-            return properties[key];
+            return properties.ContainsKey(key)
+                ? properties[key]
+                : null;
         }
     }
 }
