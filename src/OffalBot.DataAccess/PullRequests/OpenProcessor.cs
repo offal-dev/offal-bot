@@ -22,9 +22,12 @@ namespace OffalBot.DataAccess.PullRequests
                 Id = payload["pull_request"]["id"].Value<int>(),
                 Title = payload["pull_request"]["title"].Value<string>(),
                 Number = payload["pull_request"]["number"].Value<int>(),
-                Url = new Uri(payload["pull_request"]["url"].Value<string>()),
+                Url = new Uri(payload["pull_request"]["html_url"].Value<string>()),
                 CreatedAt = payload["pull_request"]["created_at"].Value<DateTimeOffset>(),
-                UpdatedAt = payload["pull_request"]["updated_at"].Value<DateTimeOffset>()
+                UpdatedAt = payload["pull_request"]["updated_at"].Value<DateTimeOffset>(),
+                Status = PullRequestStatus.Open,
+                RepositoryName = payload["repository"]["full_name"].Value<string>(),
+                RepositoryUrl = new Uri(payload["repository"]["html_url"].Value<string>()),
             };
 
             await _pullRequestRepository.Upsert(organisation, pullRequest);

@@ -6,11 +6,11 @@ namespace OffalBot.DataAccess.PullRequests
 {
     public class PullRequestProcessorFactory
     {
-        private readonly CloudStorageAccount _cloudStorage;
+        private readonly IAzureStorage _azureStorage;
 
-        public PullRequestProcessorFactory(CloudStorageAccount cloudStorage)
+        public PullRequestProcessorFactory(IAzureStorage azureStorage)
         {
-            _cloudStorage = cloudStorage;
+            _azureStorage = azureStorage;
         }
 
         public IPullRequestWebhookProcessor CreateForAction(string action)
@@ -18,7 +18,7 @@ namespace OffalBot.DataAccess.PullRequests
             switch ((action ?? "").ToLowerInvariant())
             {
                 case "opened": return new OpenProcessor(
-                    new PullRequestRepository(_cloudStorage.CreateCloudTableClient()));
+                    new PullRequestRepository(_azureStorage));
             }
 
             return null;

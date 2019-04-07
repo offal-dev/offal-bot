@@ -3,10 +3,11 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using OffalBot.DataAccess;
 
 namespace OffalBot.Functions
 {
-    public class AzureStorage
+    public class AzureStorage : IAzureStorage
     {
         private readonly CloudStorageAccount _storageAccount;
 

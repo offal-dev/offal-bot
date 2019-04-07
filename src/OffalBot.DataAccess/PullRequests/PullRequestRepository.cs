@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using OffalBot.Domain.PullRequests;
 
@@ -8,11 +7,11 @@ namespace OffalBot.DataAccess.PullRequests
 {
     public class PullRequestRepository : IPullRequestRepository
     {
-        private readonly CloudTableClient _tableClient;
+        private readonly IAzureStorage _azureStorage;
 
-        public PullRequestRepository(CloudTableClient tableClient)
+        public PullRequestRepository(IAzureStorage azureStorage)
         {
-            _tableClient = tableClient;
+            _azureStorage = azureStorage;
         }
 
         public async Task Upsert(string organisation, PullRequest pullRequest)
@@ -27,11 +26,13 @@ namespace OffalBot.DataAccess.PullRequests
                 Url = pullRequest.Url.ToString(),
                 CreatedAt = pullRequest.CreatedAt,
                 UpdatedAt = pullRequest.UpdatedAt,
-                ClosedAt = pullRequest.ClosedAt
+                ClosedAt = pullRequest.ClosedAt,
+                Status = pullRequest.Status.ToString(),
+                RepositoryName = pullRequest.RepositoryName,
+                RepositoryUrl = pullRequest.RepositoryUrl.ToString()
             };
 
-            var table =_tableClient.GetTableReference("pullrequests");
-            await table.CreateIfNotExistsAsync();
+            var table = await _azureStorage.GetTable("pullrequests");
             await table.ExecuteAsync(TableOperation.InsertOrReplace(entity));
         }
 
@@ -40,9 +41,12 @@ namespace OffalBot.DataAccess.PullRequests
             public string Title { get; set; }
             public int Number { get; set; }
             public string Url { get; set; }
+            public string Status { get; set; }
             public DateTimeOffset CreatedAt { get; set; }
             public DateTimeOffset UpdatedAt { get; set; }
             public DateTimeOffset? ClosedAt { get; set; }
+            public string RepositoryName { get; set; }
+            public string RepositoryUrl { get; set; }
         }
     }
 }

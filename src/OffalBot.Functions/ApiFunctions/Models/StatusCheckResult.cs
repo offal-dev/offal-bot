@@ -1,4 +1,5 @@
 using System;
+using OffalBot.Domain.PullRequests;
 
 namespace OffalBot.Functions.ApiFunctions.Models
 {
@@ -8,13 +9,5 @@ namespace OffalBot.Functions.ApiFunctions.Models
         public string Description { get; set; }
         public StatusCheckState State { get; set; }
         public Uri TargetUrl { get; set; }
-    }
-
-    public enum StatusCheckState
-    {
-        Error,
-        Failure,
-        Pending,
-        Success
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using OffalBot.Domain.PullRequests;
 
 namespace OffalBot.Functions.ApiFunctions.Models
 {
@@ -15,11 +16,11 @@ namespace OffalBot.Functions.ApiFunctions.Models
         public PullRequestStatus Status { get; set; }
         public string RepositoryName { get; set; }
         public Uri RepositoryUrl { get; set; }
+        public int NumberOfComments { get; set; }
         public IEnumerable<GithubUser> Assignees { get; set; }
         public IEnumerable<DeploymentEnvironment> DeploymentEnvironments { get; set; }
         public IEnumerable<ReviewStatus> Reviews { get; set; }
         public IEnumerable<StatusCheckResult> StatusCheckResults { get; set; }
         public IEnumerable<Label> Labels { get; set; }
-        public int NumberOfComments { get; set; }
     }
 }

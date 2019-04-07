@@ -1,4 +1,4 @@
-namespace OffalBot.Functions.ApiFunctions.Models
+namespace OffalBot.Domain.PullRequests
 {
     public enum PullRequestStatus
     {

@@ -1,4 +1,5 @@
 using System;
+using OffalBot.Domain.PullRequests;
 
 namespace OffalBot.Functions.ApiFunctions.Models
 {
@@ -7,12 +8,5 @@ namespace OffalBot.Functions.ApiFunctions.Models
         public GithubUser Reviewer { get; set; }
         public DateTimeOffset SubmittedAt { get; set; }
         public ReviewState State { get; set; }
-    }
-
-    public enum ReviewState
-    {
-        ChangesRequested,
-        Approved,
-        Rejected
     }
 }
