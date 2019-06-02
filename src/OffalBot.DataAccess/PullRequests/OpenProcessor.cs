@@ -1,22 +1,36 @@
-﻿using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
+﻿using System;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using OffalBot.Domain;
+using OffalBot.Domain.PullRequests;
 
 namespace OffalBot.DataAccess.PullRequests
 {
     public class OpenProcessor : IPullRequestWebhookProcessor
     {
-        private readonly CloudStorageAccount _cloudStorage;
+        private readonly IPullRequestRepository _pullRequestRepository;
 
-        public OpenProcessor(CloudStorageAccount cloudStorage)
+        public OpenProcessor(IPullRequestRepository pullRequestRepository)
         {
-            _cloudStorage = cloudStorage;
+            _pullRequestRepository = pullRequestRepository;
         }
 
-        public Task Execute(JObject payload)
+        public async Task Execute(JObject payload)
         {
-            throw new System.NotImplementedException();
+            var organisation = payload["organization"]["login"].Value<string>();
+            var pullRequest = new PullRequest
+            {
+                Id = payload["pull_request"]["id"].Value<int>(),
+                Title = payload["pull_request"]["title"].Value<string>(),
+                Number = payload["pull_request"]["number"].Value<int>(),
+                Url = new Uri(payload["pull_request"]["html_url"].Value<string>()),
+                CreatedAt = payload["pull_request"]["created_at"].Value<DateTimeOffset>(),
+                UpdatedAt = payload["pull_request"]["updated_at"].Value<DateTimeOffset>(),
+                Status = PullRequestStatus.Open,
+                RepositoryName = payload["repository"]["full_name"].Value<string>(),
+                RepositoryUrl = new Uri(payload["repository"]["html_url"].Value<string>()),
+            };
+
+            await _pullRequestRepository.Upsert(organisation, pullRequest);
         }
     }
 }

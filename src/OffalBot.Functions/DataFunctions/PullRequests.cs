@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Bindings.Azure.WebJobs.Extensions.UsefulBindings;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json.Linq;
 using OffalBot.DataAccess.PullRequests;
 
@@ -12,13 +12,13 @@ namespace OffalBot.Functions.DataFunctions
     {
         [FunctionName("pull-requests")]
         public static async Task Run(
-            [QueueTrigger("github-pullrequest-ignore")]
-            JObject payload,
+            [QueueTrigger("github-pullrequest")]JObject payload,
             CloudStorageAccount cloudStorage,
             ILogger log)
         {
             var action = payload["action"].Value<string>();
-            var processor = new PullRequestProcessorFactory(cloudStorage)
+            var azureStorage = new AzureStorage(cloudStorage);
+            var processor = new PullRequestProcessorFactory(azureStorage)
                 .CreateForAction(action);
 
             if (processor == null)
@@ -29,6 +29,10 @@ namespace OffalBot.Functions.DataFunctions
 
             log.LogInformation($"Execution action {action} ...");
             await processor.Execute(payload);
+
+            log.LogInformation($"Taking a copy of processed queue item...");
+            var queue = await azureStorage.GetQueue("github-pullrequest-backup");
+            await queue.AddMessageAsync(new CloudQueueMessage(payload.ToString()));
         }
     }
 }
