@@ -16,19 +16,19 @@ namespace OffalBot.Functions.DataFunctions
             CloudStorageAccount cloudStorage,
             ILogger log)
         {
-            var action = payload["action"].Value<string>();
+            var actionType = payload["action"].Value<string>();
             var azureStorage = new AzureStorage(cloudStorage);
-            var processor = new PullRequestProcessorFactory(azureStorage)
-                .CreateForAction(action);
+            var action = new PullRequestActionFactory(azureStorage)
+                .CreateFor(actionType);
 
-            if (processor == null)
+            if (action == null)
             {
-                log.LogInformation($"Unsupported action type {action}");
+                log.LogInformation($"Unsupported action type {actionType}");
                 return;
             }
 
-            log.LogInformation($"Execution action {action} ...");
-            await processor.Execute(payload);
+            log.LogInformation($"Executing action {actionType} ...");
+            await action.Execute(payload);
 
             log.LogInformation($"Taking a copy of processed queue item...");
             var queue = await azureStorage.GetQueue("github-pullrequest-backup");

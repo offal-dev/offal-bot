@@ -40,6 +40,23 @@ namespace OffalBot.DataAccess.PullRequests
             await table.ExecuteAsync(TableOperation.InsertOrReplace(entity));
         }
 
+        public async Task UpdateStatus(
+            string organisation,
+            int pullRequestId,
+            PullRequestStatus status)
+        {
+            var table = await _azureStorage.GetTable(PullRequestsTable);
+
+            var entity = new DynamicTableEntity(organisation.ToLowerInvariant(), pullRequestId.ToString())
+            {
+                ETag = "*",
+                Properties = { { "Status", new EntityProperty(status.ToString()) } }
+            };
+
+            var mergeOperation = TableOperation.Merge(entity);
+            await table.ExecuteAsync(mergeOperation);
+        }
+
         public async Task<IEnumerable<PullRequest>> GetForOrganisations(List<string> organisations)
         {
             if (organisations == null)
