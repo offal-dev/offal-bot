@@ -37,6 +37,7 @@ namespace OffalBot.Functions.DataFunctions
                 return new BadRequestResult();
             }
 
+            log.LogInformation($"Processing event type {eventType}");
             var queue = await new AzureStorage(cloudStorage).GetQueue($"github-{eventType}");
             await queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(jsonObject)));
 

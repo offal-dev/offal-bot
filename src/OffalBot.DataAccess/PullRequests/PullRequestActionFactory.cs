@@ -18,6 +18,10 @@ namespace OffalBot.DataAccess.PullRequests
             {
                 case "opened": return new OpenAction(
                     new PullRequestRepository(_azureStorage));
+                case "closed": return new ClosedAction(
+                    new PullRequestRepository(_azureStorage));
+                case "reopened": return new ReOpenAction(
+                    new PullRequestRepository(_azureStorage));
             }
 
             return null;

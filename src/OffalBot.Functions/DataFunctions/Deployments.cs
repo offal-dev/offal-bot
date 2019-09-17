@@ -46,7 +46,7 @@ namespace OffalBot.Functions.DataFunctions
 
             await pullRequestLabeler.Process(reviewRequest);
 
-            log.LogInformation($"Taking a copy of processed queue item...");
+            log.LogInformation("Taking a copy of processed queue item...");
             var queue = await azureStorage.GetQueue("deployments-backup");
             await queue.AddMessageAsync(new CloudQueueMessage(review.ToString()));
         }
