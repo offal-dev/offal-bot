@@ -23,7 +23,7 @@ namespace OffalBot.Functions.DataFunctions
 
             if (action == null)
             {
-                log.LogInformation($"Unsupported action type {actionType}");
+                log.LogInformation($"Unsupported action type {actionType}.");
                 return;
             }
 
