@@ -1,23 +1,22 @@
-﻿using Microsoft.WindowsAzure.Storage;
-using OffalBot.Domain;
-using OffalBot.Domain.PullRequests;
+﻿using OffalBot.DataAccess.PullRequests.Actions;
+using OffalBot.Domain.PullRequests.Actions;
 
 namespace OffalBot.DataAccess.PullRequests
 {
-    public class PullRequestProcessorFactory
+    public class PullRequestActionFactory
     {
         private readonly IAzureStorage _azureStorage;
 
-        public PullRequestProcessorFactory(IAzureStorage azureStorage)
+        public PullRequestActionFactory(IAzureStorage azureStorage)
         {
             _azureStorage = azureStorage;
         }
 
-        public IPullRequestWebhookProcessor CreateForAction(string action)
+        public IPullRequestAction CreateFor(string action)
         {
             switch ((action ?? "").ToLowerInvariant())
             {
-                case "opened": return new OpenProcessor(
+                case "opened": return new OpenAction(
                     new PullRequestRepository(_azureStorage));
             }
 

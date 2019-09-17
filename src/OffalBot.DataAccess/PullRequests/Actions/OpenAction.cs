@@ -2,14 +2,15 @@
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using OffalBot.Domain.PullRequests;
+using OffalBot.Domain.PullRequests.Actions;
 
-namespace OffalBot.DataAccess.PullRequests
+namespace OffalBot.DataAccess.PullRequests.Actions
 {
-    public class OpenProcessor : IPullRequestWebhookProcessor
+    public class OpenAction : IPullRequestAction
     {
         private readonly IPullRequestRepository _pullRequestRepository;
 
-        public OpenProcessor(IPullRequestRepository pullRequestRepository)
+        public OpenAction(IPullRequestRepository pullRequestRepository)
         {
             _pullRequestRepository = pullRequestRepository;
         }

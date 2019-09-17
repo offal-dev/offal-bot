@@ -91,6 +91,7 @@ namespace OffalBot.Functions.Auth
 
             return accessTokenResponse["access_token"].Value<string>();
         }
+
         private static async Task<string> StoreSessionInfo(
             CloudStorageAccount storageAccount,
             IEnumerable<Organization> organisations,
