@@ -23,11 +23,11 @@ namespace OffalBot.Functions.DataFunctions
 
             if (action == null)
             {
-                log.LogInformation($"Unsupported action type {action}");
+                log.LogInformation($"Unsupported action type {actionType}");
                 return;
             }
 
-            log.LogInformation($"Executing action {action} ...");
+            log.LogInformation($"Executing action {actionType} ...");
             await action.Execute(payload);
 
             log.LogInformation($"Taking a copy of processed queue item...");
