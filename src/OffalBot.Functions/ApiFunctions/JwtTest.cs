@@ -35,6 +35,6 @@ namespace OffalBot.Functions.ApiFunctions
                 Formatting = Formatting.Indented,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             });
-        }
+        } 
     }
 }
