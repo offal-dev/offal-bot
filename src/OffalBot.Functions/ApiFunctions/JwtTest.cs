@@ -25,8 +25,12 @@ namespace OffalBot.Functions.ApiFunctions
             ILogger log)
         {
             var result = await _accessTokenProvider.ValidateToken(req);
+            if (result.Status != AccessTokenStatus.Valid)
+            {
+                return new UnauthorizedResult();
+            }
 
-            return new JsonResult(result.EmailAddress(), new JsonSerializerSettings
+            return new JsonResult(new { email = result.EmailAddress() }, new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
