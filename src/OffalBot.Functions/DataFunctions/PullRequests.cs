@@ -8,16 +8,23 @@ using OffalBot.DataAccess.PullRequests;
 
 namespace OffalBot.Functions.DataFunctions
 {
-    public static class PullRequests
+    public class PullRequests
     {
+        private readonly CloudStorageAccount _cloudStorage;
+
+        public PullRequests(
+            CloudStorageAccount cloudStorage)
+        {
+            _cloudStorage = cloudStorage;
+        }
+
         [FunctionName("pull-requests")]
-        public static async Task Run(
+        public async Task Run(
             [QueueTrigger("github-pullrequest")]JObject payload,
-            CloudStorageAccount cloudStorage,
             ILogger log)
         {
             var actionType = payload["action"].Value<string>();
-            var azureStorage = new AzureStorage(cloudStorage);
+            var azureStorage = new AzureStorage(_cloudStorage);
             var action = new PullRequestActionFactory(azureStorage)
                 .CreateFor(actionType);
 

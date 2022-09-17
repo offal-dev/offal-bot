@@ -11,15 +11,21 @@ using OffalBot.Functions.Auth;
 
 namespace OffalBot.Functions.ApiFunctions
 {
-    public static class MeApi
+    public class MeApi
     {
+        private readonly CloudStorageAccount _storageAccount;
+
+        public MeApi(CloudStorageAccount storageAccount)
+        {
+            _storageAccount = storageAccount;
+        }
+
         [FunctionName("me-api")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "me")] HttpRequest req,
-            CloudStorageAccount storageAccount,
             ILogger log)
         {
-            var session = await req.GetAuthSession(storageAccount);
+            var session = await req.GetAuthSession(_storageAccount);
             if (session == null)
             {
                 log.LogInformation("Unable to find session");

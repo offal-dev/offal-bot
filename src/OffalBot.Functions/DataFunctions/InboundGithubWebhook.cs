@@ -13,12 +13,18 @@ using Newtonsoft.Json.Linq;
 
 namespace OffalBot.Functions.DataFunctions
 {
-    public static class InboundGithubWebhook
+    public class InboundGithubWebhook
     {
+        private readonly CloudStorageAccount _cloudStorageAccount;
+
+        public InboundGithubWebhook(CloudStorageAccount cloudStorageAccount)
+        {
+            _cloudStorageAccount = cloudStorageAccount;
+        }
+
         [FunctionName("inbound-github-webhook")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "github/webhooks")]HttpRequest req,
-            CloudStorageAccount cloudStorage,
             ILogger log)
         {
             var payLoad = await new StreamReader(req.Body).ReadToEndAsync();
@@ -38,7 +44,7 @@ namespace OffalBot.Functions.DataFunctions
             }
 
             log.LogInformation($"Processing event type {eventType}");
-            var queue = await new AzureStorage(cloudStorage).GetQueue($"github-{eventType}");
+            var queue = await new AzureStorage(_cloudStorageAccount).GetQueue($"github-{eventType}");
             await queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(jsonObject)));
 
             return new OkResult();

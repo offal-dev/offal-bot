@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Bindings.Azure.WebJobs.Extensions.UsefulBindings;
 using Flurl;
 using Flurl.Http;
 using Microsoft.AspNetCore.Http;
@@ -17,18 +16,27 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Octokit;
+using OffalBot.Functions.Configuration;
 using OffalBot.Functions.Github;
 
 namespace OffalBot.Functions.Auth
 {
-    public static class GithubLogin
+    public class GithubLogin
     {
+        private readonly GithubConfig _githubConfig;
+        private readonly CloudStorageAccount _storageAccount;
+
+        public GithubLogin(
+            GithubConfig githubConfig,
+            CloudStorageAccount storageAccount)
+        {
+            _githubConfig = githubConfig;
+            _storageAccount = storageAccount;
+        }
+
         [FunctionName("github-login")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "github/login")] HttpRequest req,
-            [FromConfig(Name = "github-oauth-client-id")]string clientId,
-            [FromConfig(Name = "github-oauth-client-secret")]string clientSecret,
-            CloudStorageAccount storageAccount,
             ILogger log)
         {
             var code = req.Query["code"];
@@ -36,8 +44,8 @@ namespace OffalBot.Functions.Auth
             log.LogInformation("Exchanging code for access code...");
 
             var accessToken = await GetAccessToken(
-                clientId,
-                clientSecret,
+                _githubConfig.OauthClientId,
+                _githubConfig.OauthSecret,
                 code);
 
             if (string.IsNullOrEmpty(accessToken))
@@ -57,7 +65,7 @@ namespace OffalBot.Functions.Auth
             }
 
             var sessionId = await StoreSessionInfo(
-                storageAccount,
+                _storageAccount,
                 organisations,
                 user,
                 log);
