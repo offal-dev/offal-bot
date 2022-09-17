@@ -1,28 +1,31 @@
 using System.Threading.Tasks;
-using Bindings.Azure.WebJobs.Extensions.UsefulBindings;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OffalBot.DataAccess;
 using OffalBot.Domain;
+using OffalBot.Functions.Configuration;
 using OffalBot.Functions.Github;
 
 namespace OffalBot.Functions.DataFunctions
 {
-    public static class Deployments
+    public class Deployments
     {
+        private readonly GithubConfig _githubConfig;
+
+        public Deployments(
+            GithubConfig githubOauthConfig)
+        {
+            _githubConfig = githubOauthConfig;
+        }
+
         [FunctionName("deployments")]
-        public static async Task Run(
+        [return: Queue("deployments-backup")]
+        public async Task<string> Run(
             [QueueTrigger("github-deployment")]JObject review,
-            [FromConfig(Name = "github-app-id")]string githubAppId,
-            [FromConfig(Name = "github-app-key")]string githubAppKey,
-            CloudStorageAccount cloudStorage,
             ILogger log)
         {
-            var azureStorage = new AzureStorage(cloudStorage);
             var reviewRequest = new DeploymentRequest
             {
                 InstallationId = review["installation"]["id"].Value<int>(),
@@ -34,8 +37,8 @@ namespace OffalBot.Functions.DataFunctions
             log.LogInformation($"Processing: {JsonConvert.SerializeObject(reviewRequest, Formatting.Indented)}");
 
             var githubClient = await new GitHubClientProvider().CreateForInstallation(
-                githubAppId,
-                githubAppKey,
+                _githubConfig.AppId,
+                _githubConfig.AppKey,
                 reviewRequest.InstallationId);
 
             var pullRequestLabeler = new DeploymentLabeler(
@@ -47,8 +50,7 @@ namespace OffalBot.Functions.DataFunctions
             await pullRequestLabeler.Process(reviewRequest);
 
             log.LogInformation("Taking a copy of processed queue item...");
-            var queue = await azureStorage.GetQueue("deployments-backup");
-            await queue.AddMessageAsync(new CloudQueueMessage(review.ToString()));
+            return review.ToString();
         }
     }
 }
